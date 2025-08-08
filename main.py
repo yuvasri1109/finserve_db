@@ -17,11 +17,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ---- Config ----
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
-# ---- FastAPI app ----
 app = FastAPI(
     title="LLM Query Retrieval (PDF/URL)",
     version="1.1",
@@ -40,7 +38,6 @@ app.add_middleware(
 DOCUMENTS = {}
 
 
-# ---- Helpers ----
 def process_document_to_vectorstore(file_path: str) -> FAISS:
     """
     Load a PDF/XLSX file and build a FAISS vectorstore from chunks.
@@ -78,7 +75,6 @@ def build_llm_chain(vectorstore: FAISS):
     )
 
 
-# ---- Pydantic models ----
 class RunRequest(BaseModel):
     document_id: Optional[str] = None
     document_url: Optional[str] = None
@@ -89,13 +85,11 @@ class RunResponse(BaseModel):
     answers: List[str]
 
 
-# ---- Health check ----
 @app.get("/")
 async def root():
     return {"status": "ok", "message": "HackRx backend running"}
 
 
-# ---- Upload single file ----
 @app.post("/upload")
 async def upload_single_file(file: UploadFile = File(...)):
     try:
@@ -113,7 +107,6 @@ async def upload_single_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Single upload failed: {str(e)}")
 
 
-# ---- Upload multiple files ----
 @app.post("/upload-multiple")
 async def upload_multiple_files(files: List[UploadFile] = File(...)):
     try:
@@ -143,7 +136,6 @@ async def upload_multiple_files(files: List[UploadFile] = File(...)):
         raise HTTPException(status_code=500, detail=f"Multiple upload failed: {str(e)}")
 
 
-# ---- HackRx Webhook ----
 @app.post("/api/v1/hackrx/run", response_model=RunResponse)
 async def hackrx_run(req: RunRequest):
     try:
